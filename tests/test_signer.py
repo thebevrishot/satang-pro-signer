@@ -18,3 +18,8 @@ class SignerTest(unittest.TestCase):
     def test_sign_dict_with_multiple_keys(self):
         obj = json.loads('{"foo":"bar", "dog": 99}')
         self.check_sign(obj, bytes.fromhex("e82294234e22f42d695600cda19af923a4acf53945860dcbf4af54ec2c4b5e18b023a5894cb7f010752d13c1a14da5ca22d1c769dfc5ad271caeadeabf30450a"))
+
+    def test_sign_dict_with_double(self):
+        obj = json.loads('{"foo":"bar", "dog": 99, "cat": 10.00014}')
+        self.check_sign(obj, bytes.fromhex("f81938dfdd4f30244f0e242856d7be1471f4d9d75a44cba696415bf17479d80a9b511c20698d219996718bd4b1ed37538d0e0dadbbe09e280a0c0e438a1e6304"))
+
