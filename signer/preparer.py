@@ -38,6 +38,10 @@ class ListPreparer(Preparer):
 
         return '&'.join(parts)
 
+class NonePreparer(Preparer):
+    def parse(self) -> str:
+        return ""
+
 # class that require prefix
 class ValuePreparer(Preparer):
     def __init__(self, obj, prefix: str = ""):
@@ -73,5 +77,7 @@ class PreparerFactory:
             return IntPreparer(obj, prefix)
         elif isinstance(obj, float):
             return FloatPreparer(obj, prefix)
+        elif obj is None:
+            return NonePreparer(obj, prefix)
 
         raise Exception(f"type {type(obj)} have not been supported yet")
