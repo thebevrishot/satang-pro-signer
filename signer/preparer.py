@@ -19,33 +19,47 @@ class Preparer:
 class DictPreparer(Preparer):
     def parse(self) -> str:
 
-        payload = ""
+        parts = []
         for k, v in sorted(self.obj.items()):
-            payload += "&" + PreparerFactory(). \
-                get_preparer(v, self.append_prefix(k)).parse()
+            parts.append(
+                PreparerFactory().get_preparer(v, self.append_prefix(k)).parse()
+            )
 
-        payload = payload[1:]
-
-        return payload
+        return '&'.join(parts)
 
 class ListPreparer(Preparer):
     def parse(self) -> str:
 
-        payload = ""
+        parts = []
         for i, v in enumerate(self.obj):
-            payload += "&" + PreparerFactory(). \
-                get_preparer(v, self.append_prefix(i)).parse()
-        payload = payload[1:]
+            parts.append(
+                PreparerFactory().get_preparer(v, self.append_prefix(i)).parse()
+            )
 
-        return payload
+        return '&'.join(parts)
 
-class StrPreparer(Preparer):
+# class that require prefix
+class ValuePreparer(Preparer):
+    def __init__(self, obj, prefix: str = ""):
+        super().__init__(obj, prefix)
+
+        if len(prefix) == 0:
+            raise ValueError(f'Single {type(obj)} could not be accepted')
+
+class StrPreparer(ValuePreparer):
     def parse(self) -> str:
+
         return self.prefix + "=" + self.obj
 
-class IntPreparer(Preparer):
+class IntPreparer(ValuePreparer):
     def parse(self) -> str:
+
         return self.prefix + "=" + str(self.obj)
+
+class FloatPreparer(ValuePreparer):
+    def parse(self) -> str:
+
+        return f'{self.prefix}={str(self.obj)}'
 
 class PreparerFactory:
     def get_preparer(self, obj, prefix: str = "") -> Preparer:
@@ -57,5 +71,7 @@ class PreparerFactory:
             return StrPreparer(obj, prefix)
         elif isinstance(obj, int):
             return IntPreparer(obj, prefix)
+        elif isinstance(obj, float):
+            return FloatPreparer(obj, prefix)
 
         raise Exception(f"type {type(obj)} have not been supported yet")

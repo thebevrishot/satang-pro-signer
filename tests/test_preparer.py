@@ -61,3 +61,27 @@ class PreparerTest(unittest.TestCase):
     def test_dict_with_integer_and_array_as_values(self):
         obj = json.loads('{"foo": 100, "bar": ["dog", "cat", 99] }')
         self.check_payload(obj, "bar[0]=dog&bar[1]=cat&bar[2]=99&foo=100")
+
+    # double
+    def test_dict_with_double(self):
+        obj = json.loads('{"foo":1.01}')
+        self.check_payload(obj, "foo=1.01")
+
+    # single value
+    def test_single_value_string_should_throw(self):
+        self.assertRaises(
+            ValueError,
+            self.check_payload, "foo", ""
+        )
+
+    def test_single_value_integer_should_throw(self):
+        self.assertRaises(
+            ValueError,
+            self.check_payload, 10, ""
+        )
+
+    def test_single_value_float_should_throw(self):
+        self.assertRaises(
+            ValueError,
+            self.check_payload, 1.01, ""
+        )
