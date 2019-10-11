@@ -5,8 +5,12 @@ from satang_pro_signer import preparer
 
 class PreparerTest(unittest.TestCase):
     def check_payload(self, obj: object, expected_payload: str):
-        sub = preparer.PreparerFactory().get_preparer(obj)
-        self.assertEqual(expected_payload, sub.parse())
+        res = preparer.Preparer(obj).encode()
+        self.assertEqual(expected_payload, res)
+
+    # None
+    def test_none(self):
+        self.check_payload(None, "")
 
     # string only
     def test_empty_dict(self):
@@ -84,4 +88,10 @@ class PreparerTest(unittest.TestCase):
         self.assertRaises(
             ValueError,
             self.check_payload, 1.01, ""
+        )
+
+    def test_dict_with_none_should_throw(self):
+        self.assertRaises(
+            ValueError,
+            self.check_payload, {"foo": None}, ""
         )

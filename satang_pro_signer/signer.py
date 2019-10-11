@@ -8,10 +8,8 @@ class Signer:
         self.secret = secret
 
     def sign(self, obj) -> bytes:
-        parsed = preparer.PreparerFactory().get_preparer(obj).parse()
+
+        parsed = preparer.Preparer(obj).encode()
         msg = bytes(parsed, encoding='utf-8')
 
-        mac = hmac.new(self.secret, digestmod=hashlib.sha512)
-        mac.update(msg)
-
-        return mac.digest()
+        return hmac.digest(self.secret, msg, 'sha512')

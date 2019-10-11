@@ -1,83 +1,98 @@
-class Preparer:
-    def __init__(self, obj, prefix: str = ""):
+from typing import List
+
+class Part:
+    def __init__(self, keys: List[str], val: str):
+        self._ks = keys
+        self._v = val
+
+    def encode(self) -> str:
+        if len(self._ks) == 0:
+            raise ValueError('Key is required')
+
+        data: str = self._ks[0]
+        for k in self._ks[1:]:
+            data += f'[{k}]'
+
+        return f'{data}={self._v}'
+
+class Encoder:
+    def __init__(self, obj, keys: List[str] = []):
         self.obj = obj
-        self.prefix = prefix
+        self.keys = keys
 
-    def append_prefix(self, val) -> str:
-        prefix = val
-
-        if not isinstance(prefix, str):
-            prefix = str(prefix)
-
-        if len(self.prefix) > 0:
-            prefix = f'{self.prefix}[{prefix}]'
-        return prefix
-
-    def parse(self) -> str:
+    def encode(self) -> List[Part]:
         pass
 
-class DictPreparer(Preparer):
-    def parse(self) -> str:
+class DictEncoder(Encoder):
+    def encode(self) -> List[Part]:
 
-        parts = []
+        pairs: List[Part] = []
+
         for k, v in sorted(self.obj.items()):
-            parts.append(
-                PreparerFactory().get_preparer(v, self.append_prefix(k)).parse()
+            keys = self.keys.copy()
+            keys.append(k)
+
+            pairs.extend(
+                EncoderFactory().get_encoder(v, keys).encode()
             )
 
-        return '&'.join(parts)
+        return pairs
 
-class ListPreparer(Preparer):
-    def parse(self) -> str:
+class ListEncoder(Encoder):
+    def encode(self) -> List[Part]:
 
-        parts = []
+        parts: List[Part] = []
         for i, v in enumerate(self.obj):
-            parts.append(
-                PreparerFactory().get_preparer(v, self.append_prefix(i)).parse()
+            keys = self.keys.copy()
+            keys.append(str(i))
+
+            parts.extend(
+                EncoderFactory().get_encoder(v, keys).encode()
             )
 
-        return '&'.join(parts)
+        return parts
 
-class NonePreparer(Preparer):
-    def parse(self) -> str:
-        return ""
+class StrEncoder(Encoder):
+    def encode(self) -> List[Part]:
+        return [Part(self.keys, self.obj)]
 
-# class that require prefix
-class ValuePreparer(Preparer):
-    def __init__(self, obj, prefix: str = ""):
-        super().__init__(obj, prefix)
+class IntEncoder(Encoder):
+    def encode(self) -> List[Part]:
+        return [Part(self.keys, str(self.obj))]
 
-        if len(prefix) == 0:
-            raise ValueError(f'Single {type(obj)} could not be accepted')
+class FloatEncoder(Encoder):
+    def encode(self) -> List[Part]:
+        return [Part(self.keys, str(self.obj))]
 
-class StrPreparer(ValuePreparer):
-    def parse(self) -> str:
+class NoneEncoder(Encoder):
+    def encode(self) -> List[Part]:
+        if len(self.keys) != 0:
+            raise ValueError('None is not value')
 
-        return self.prefix + "=" + self.obj
+        return []
 
-class IntPreparer(ValuePreparer):
-    def parse(self) -> str:
-
-        return self.prefix + "=" + str(self.obj)
-
-class FloatPreparer(ValuePreparer):
-    def parse(self) -> str:
-
-        return f'{self.prefix}={str(self.obj)}'
-
-class PreparerFactory:
-    def get_preparer(self, obj, prefix: str = "") -> Preparer:
+class EncoderFactory:
+    def get_encoder(self, obj, keys: List[str] = []) -> Encoder:
         if isinstance(obj, dict):
-            return DictPreparer(obj, prefix)
+            return DictEncoder(obj, keys)
         elif isinstance(obj, list):
-            return ListPreparer(obj, prefix)
+            return ListEncoder(obj, keys)
         elif isinstance(obj, str):
-            return StrPreparer(obj, prefix)
+            return StrEncoder(obj, keys)
         elif isinstance(obj, int):
-            return IntPreparer(obj, prefix)
+            return IntEncoder(obj, keys)
         elif isinstance(obj, float):
-            return FloatPreparer(obj, prefix)
+            return FloatEncoder(obj, keys)
         elif obj is None:
-            return NonePreparer(obj, prefix)
+            return NoneEncoder(obj, keys)
 
         raise Exception(f"type {type(obj)} have not been supported yet")
+
+class Preparer:
+    def __init__(self, obj: object):
+        self._obj = obj
+
+    def encode(self) -> str:
+        pairs: List[Part] = EncoderFactory().get_encoder(self._obj).encode()
+
+        return '&'.join([p.encode() for p in pairs])
