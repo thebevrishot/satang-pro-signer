@@ -12,4 +12,10 @@ class Signer:
         parsed = preparer.Preparer(obj).encode()
         msg = bytes(parsed, encoding='utf-8')
 
-        return hmac.digest(self.secret, msg, 'sha512')
+        try:
+            # better performance
+            return hmac.digest(self.secret, msg, 'sha512')
+        except AttributeError:
+            # compatible with Python 3.6
+            m = hmac.new(self.secret, msg, hashlib.sha512)
+            return m.digest()
