@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="satang-pro-signer-x",
-    version="0.0.1.dev1",
+    version="0.0.1.dev2",
     author="Panu",
     author_email="Panu.suk@protonmail.com",
     description="An implementation of Satang Pro signing request scheme",
