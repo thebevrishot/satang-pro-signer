@@ -7,7 +7,7 @@ https://docs.satang.pro/authentication
 ## installation
 
 ```
-pip install satang-pro-signer
+pip install satang-pro-signer-x
 ```
 
 ## usage
