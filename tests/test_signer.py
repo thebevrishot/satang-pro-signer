@@ -1,7 +1,7 @@
 import unittest
 import json
 
-from signer import signer
+from satang_pro_signer import signer
 
 class SignerTest(unittest.TestCase):
     def check_sign(self, obj, expected: bytes, key: bytes = bytes.fromhex('8781e58f94f8b2a58b6aa30649fd6a46')):

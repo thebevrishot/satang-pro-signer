@@ -1,7 +1,7 @@
 import hashlib
 import hmac
 
-from . import preparer
+from satang_pro_signer import preparer
 
 class Signer:
     def __init__(self, secret: bytes):

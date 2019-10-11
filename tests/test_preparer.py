@@ -1,7 +1,7 @@
 import unittest
 import json
 
-from signer import preparer
+from satang_pro_signer import preparer
 
 class PreparerTest(unittest.TestCase):
     def check_payload(self, obj: object, expected_payload: str):
